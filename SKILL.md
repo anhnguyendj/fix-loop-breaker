@@ -1,6 +1,6 @@
 ---
 name: fix-loop-breaker
-description: Thoát vòng "bảo AI sửa mãi mà lỗi vẫn còn". Dừng vá, rồi đi đủ 6 bước có cổng chặn - tái hiện lỗi và gom sự thật → 3 lăng kính (nguyên lý gốc, bóc cấu trúc, thứ tự Hỏi lại → Xoá → Đơn giản → Tăng tốc → Tự động) kèm sơ đồ luồng hiện tại → hai AI cùng tìm phương án → viết lại spec → sơ đồ luồng mới rồi mới code → kiểm thật bằng chính ca lỗi ban đầu. Dùng khi sửa cùng một chỗ lần thứ 2 cho cùng một loại lỗi, một lỗi đã quá 60 phút, hoặc người dùng nói "sửa mãi không được", "fix cả ngày vẫn lỗi", "luẩn quẩn", "lại lỗi đó", "lâu thế", "stuck", "same error again", "going in circles", "AI keeps breaking it".
+description: Thoát vòng "bảo AI sửa mãi mà lỗi vẫn còn". Dừng vá, rồi đi đủ 6 bước có cổng chặn - tái hiện lỗi và gom sự thật → 3 lăng kính (nguyên lý gốc, bóc cấu trúc, thứ tự Hỏi lại → Xoá → Đơn giản → Tăng tốc → Tự động) kèm sơ đồ luồng hiện tại → hai AI cùng tìm phương án → viết lại spec → sơ đồ luồng mới rồi mới code → kiểm thật bằng chính ca lỗi ban đầu. Dùng NGAY khi người dùng báo có lỗi - "lỗi rồi", "lỗi", "bị lỗi", "tool lỗi", "fix lỗi", "sửa lỗi", "fix đi", "không chạy", "chạy sai", "ra sai", "báo sai", "hỏng rồi", "error", "bug", "broken", "doesn't work", "fix it". Và khi sửa cùng một chỗ lần thứ 2 cho cùng một loại lỗi, một lỗi đã quá 60 phút, hoặc người dùng nói "sửa mãi không được", "fix cả ngày vẫn lỗi", "luẩn quẩn", "lại lỗi đó", "lâu thế", "stuck", "same error again", "going in circles", "AI keeps breaking it".
 ---
 
 # fix-loop-breaker
@@ -22,17 +22,20 @@ chưa qua cổng thì không sang bước sau.
 
 ## Khi nào dùng
 
-Bắt buộc dùng khi gặp **một trong ba** điều sau, không chờ cảm giác "hình như đang luẩn quẩn":
+Bắt buộc dùng khi gặp **một trong bốn** điều sau, không chờ cảm giác "hình như đang luẩn quẩn":
 
+- Người dùng **báo có lỗi**: "lỗi rồi", "tool lỗi", "fix lỗi", "không chạy", "ra sai", "error", "bug"...
 - Sửa **cùng một file hoặc cùng một bộ phận lần thứ 2** cho cùng một loại lỗi
 - Một lỗi đã kéo **quá 60 phút**
 - Người dùng nói kiểu "lâu thế", "luẩn quẩn", "vẫn chưa xong", "lại lỗi đó"
 
-**KHÔNG dùng khi:** lỗi vặt sửa một dòng là xong lần đầu, thông báo lỗi đã chỉ thẳng nguyên nhân
-(thiếu thư viện, sai đường dẫn, thiếu key) và sửa xong chạy được ngay. Khi đó chỉ cần bước 0 và bước 5.
+**Đường tắt cho lỗi vặt:** mọi lỗi đều bắt đầu từ bước 0. Nếu bước 0 đã lộ rõ nguyên nhân (thiếu thư
+viện, sai đường dẫn, thiếu key, sai phiên bản) thì sửa luôn rồi nhảy sang bước 5 để kiểm. Đã đi đường
+tắt mà vẫn hỏng thì quay lại bước 1, không đi đường tắt lần thứ hai.
 
-**Quyền DỪNG:** từ lúc skill này chạy, **cấm sửa code** cho tới khi xong bước 3. Mọi lần "thử sửa nhanh
-cái này xem sao" trong lúc đang phân tích chính là cái vòng mà skill này sinh ra để cắt.
+**Quyền DỪNG:** từ lúc skill này chạy, **cấm vá theo đoán**. Chỉ được sửa code khi bước 0 đã lộ rõ
+nguyên nhân (đường tắt), hoặc sau khi xong bước 3. Mọi lần "thử sửa nhanh cái này xem sao" trong lúc
+chưa rõ nguyên nhân chính là cái vòng mà skill này sinh ra để cắt.
 
 ---
 

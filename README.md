@@ -23,6 +23,8 @@ thứ tự, mỗi bước có cổng chặn:
 
 ## Khi nào nó tự chạy
 
+- Bạn báo có lỗi: "lỗi rồi", "tool lỗi", "fix lỗi", "không chạy", "ra sai", "error", "bug"...
+  Lỗi vặt thì bước 0 thường đã lộ nguyên nhân, sửa luôn rồi sang bước 5 kiểm, không phải đi đủ 6 bước.
 - Sửa cùng một chỗ lần thứ 2 cho cùng một loại lỗi
 - Một lỗi đã quá 60 phút
 - Bạn nói "sửa mãi không được", "luẩn quẩn", "lại lỗi đó", "stuck", "going in circles"...
