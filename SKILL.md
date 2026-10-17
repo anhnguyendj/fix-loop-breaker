@@ -134,11 +134,71 @@ Hỏi: (1) nguyên nhân gốc theo bạn là gì, giả định nào bạn nghi
 (2) bước nào XOÁ được thay vì sửa; (3) một thử nghiệm < 15 phút phân biệt giả thuyết của bạn với giả thuyết sau: <giả thuyết của AI thứ nhất>.
 ```
 
-Ví dụ gọi Codex CLI ở chế độ chỉ đọc, chạy nền:
+### 2a. Kiểm xem máy đã có AI thứ hai chưa
+
+Agent tự chạy, không hỏi người dùng:
+
+```bash
+codex --version      # có số phiên bản = đã có Codex CLI
+node --version       # Codex cần Node.js 18.18 trở lên
+```
+
+Và xem trong danh sách lệnh của Claude Code có `/codex:setup`, `/codex:review` chưa (có = đã cài plugin Codex).
+
+| Tình trạng | Làm gì |
+|---|---|
+| Có Codex CLI | Gọi thẳng ở chế độ chỉ đọc (mục 2c) |
+| Có plugin Codex trong Claude Code | Nhờ người dùng gõ `/codex:adversarial-review` kèm câu hỏi ở trên, hoặc gọi CLI như mục 2c |
+| Chưa có gì | Hướng dẫn cài (mục 2b). Người dùng chưa muốn cài thì dùng đường dự phòng (mục 2d) |
+
+### 2b. Cài Codex lần đầu (cho người chưa biết)
+
+Codex là AI lập trình của OpenAI. Dùng được bằng tài khoản ChatGPT (kể cả gói Free) hoặc API key của OpenAI,
+lượt dùng tính vào hạn mức Codex của tài khoản đó.
+
+Giải thích ngắn cho người dùng vì sao cần (một AI khác, không dính cách nghĩ của phiên đang kẹt), **hỏi họ có
+đồng ý cài không**, rồi đi từng bước:
+
+1. **Cài Codex CLI.** Máy có `npm` thì agent tự chạy được (sau khi người dùng đồng ý):
+   ```bash
+   npm install -g @openai/codex
+   ```
+   Chưa có Node.js thì nhờ người dùng cài bản LTS ở https://nodejs.org trước.
+2. **Đăng nhập.** Bước này cần người dùng tự làm vì phải mở trình duyệt. Trong Claude Code, bảo họ gõ:
+   ```
+   ! codex login
+   ```
+3. **(Tuỳ chọn) Cài plugin Codex cho Claude Code**, để có sẵn các lệnh `/codex:review`,
+   `/codex:adversarial-review`, `/codex:rescue`. Agent không tự gõ được lệnh có dấu `/`, nên nhờ người dùng
+   gõ lần lượt:
+   ```
+   /plugin marketplace add openai/codex-plugin-cc
+   /plugin install codex@openai-codex
+   /reload-plugins
+   /codex:setup
+   ```
+   `/codex:setup` báo Codex đã sẵn sàng chưa. Nếu thiếu Codex mà máy có npm, nó cũng tự đề nghị cài.
+4. **Kiểm lại:** `codex --version` ra số phiên bản, và một lệnh thử ở mục 2c chạy ra chữ (không báo lỗi đăng
+   nhập), thì mới tính là cài xong.
+
+### 2c. Gọi Codex ở chế độ chỉ đọc
+
+Lưu câu hỏi ở trên vào `prompt.txt`, chạy nền (thường mất 5 đến 10 phút):
 
 ```bash
 codex exec --skip-git-repo-check -s read-only -C "<thư mục dự án>" - < prompt.txt > codex-out.txt
 ```
+
+`-s read-only` bảo đảm Codex chỉ đọc, không sửa file. Trong lúc chờ, agent tự làm phần phân tích của mình.
+Codex xong thì đặt hai ý cạnh nhau.
+
+### 2d. Đường dự phòng khi không cài được Codex
+
+- **Một phiên Claude mới, context sạch:** gọi một subagent mới (hoặc mở một cửa sổ Claude Code khác) và chỉ
+  đưa `FIX-NOTES.md`, sơ đồ và câu hỏi ở trên. Cùng một model nhưng không mang theo lịch sử sửa hỏng thì vẫn
+  nhìn ra được điều phiên đang kẹt bỏ sót.
+- **Một AI khác trên web:** dán câu hỏi ở trên vào ChatGPT, Gemini hoặc Claude ở một cửa sổ khác, rồi dán câu
+  trả lời lại cho agent.
 
 **Cổng:** có một phương án được chọn, kèm lý do và kết quả thử nghiệm phân xử (nếu hai bên lệch nhau).
 Báo người dùng **cả hai ý**, kể cả ý không được chọn.
@@ -228,3 +288,34 @@ Bước <n> xong.
 
 Lần cuối báo: lỗi gốc là gì, đã xoá gì, đã đổi gì trong spec, kết quả kiểm thật (lệnh đã chạy + kết quả),
 bài học đã ghi ở đâu.
+
+---
+
+## Skill này phải tự tốt lên
+
+Skill là tài liệu sống: mỗi lần dùng phải để lại dấu, để lần sau dùng tốt hơn một chút. Bốn luật cho agent
+đang đọc file này:
+
+1. **Tự chấm sau mỗi ca.** Xong bước 5 thì chấm nhanh: mất bao lâu, quay lại bước 1 mấy lần, người dùng phải
+   chỉ ra mấy chỗ, chỗ nào lẽ ra skill phải tự thấy. Ghi một dòng vào **Nhật ký ca** bên dưới.
+2. **Người dùng sửa sai = một dòng Sổ sửa sai.** Mỗi lần người dùng chỉ ra agent làm sai (đi đường tắt sai lúc,
+   bỏ qua cổng, báo xong khi chưa xong...), ghi: người dùng thấy gì, nguyên nhân thật, luật rút ra. Lỗi đã vào
+   sổ mà ca sau lặp lại nghĩa là skill hỏng: **sửa skill trước**, rồi mới sửa tiếp lỗi của người dùng.
+3. **Bẫy cắn từ 2 ca trở lên thì nâng hạng.** Đưa nó lên bảng "Bẫy đã gặp", hoặc sửa thẳng bước liên quan cho
+   cổng chặn chặt hơn. Sửa xong báo người dùng một dòng: đã sửa gì trong skill.
+4. **Thi thoảng kiểm lại, không biết thì hỏi.** Lệnh cài Codex, tên plugin, cờ dòng lệnh có thể đổi theo phiên
+   bản. Lệnh nào báo lỗi thì đọc tài liệu gốc (https://github.com/openai/codex-plugin-cc,
+   https://github.com/openai/codex) rồi sửa lại mục 2b, đừng đoán. Cái gì ngoài tầm thì nói thẳng với người dùng.
+
+Có cải tiến đáng chia sẻ cho người khác thì gợi ý người dùng mở issue hoặc pull request ở
+https://github.com/anhnguyendj/fix-loop-breaker.
+
+### Nhật ký ca
+
+| Ngày | Lỗi (một dòng) | Gốc thật | Mất bao lâu / số vòng | Đi đường tắt? | Skill cần sửa gì |
+|---|---|---|---|---|---|
+
+### Sổ sửa sai (người dùng chỉ ra → luật rút ra)
+
+| Ngày | Người dùng thấy | Nguyên nhân thật | Luật rút ra |
+|---|---|---|---|

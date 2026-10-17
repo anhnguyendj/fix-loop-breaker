@@ -50,8 +50,32 @@ Khi sửa cùng một chỗ lần thứ 2, một lỗi quá 60 phút, hoặc ng�
 
 **Claude trên web / app:** Settings → Capabilities → Skills → tải lên thư mục này dạng `.zip`.
 
-Bước 2 cần một AI thứ hai. Có Codex CLI thì skill có sẵn lệnh gọi chế độ chỉ đọc; không có thì dán phần
-"Mẫu câu hỏi" trong `SKILL.md` vào ChatGPT, Gemini hay Claude ở một cửa sổ khác.
+### Bước 2 cần một AI thứ hai: Codex
+
+Chưa cài Codex cũng không sao: skill tự kiểm máy, giải thích, xin phép rồi hướng dẫn cài từng bước. Muốn cài
+trước thì làm thế này (cần Node.js 18.18+ và tài khoản ChatGPT, gói Free cũng được):
+
+```bash
+npm install -g @openai/codex
+codex login
+```
+
+Thêm plugin Codex cho Claude Code (gõ trong Claude Code):
+
+```
+/plugin marketplace add openai/codex-plugin-cc
+/plugin install codex@openai-codex
+/reload-plugins
+/codex:setup
+```
+
+Không cài được thì skill dùng đường dự phòng: một phiên Claude mới chỉ đọc sự thật, hoặc dán câu hỏi vào
+ChatGPT, Gemini ở cửa sổ khác.
+
+### Skill tự tốt lên sau mỗi lần dùng
+
+Cuối `SKILL.md` có **Nhật ký ca** và **Sổ sửa sai**. Sau mỗi lỗi, agent tự chấm và ghi lại; bẫy lặp từ 2 lần
+trở lên thì nó sửa thẳng vào skill. Dùng càng nhiều, skill càng khớp với cách bạn làm việc.
 
 ---
 
